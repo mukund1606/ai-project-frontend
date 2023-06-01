@@ -27,8 +27,8 @@ export default function Home() {
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("data", data);
     try {
-      const res = await fetch("http://localhost:8000/", {
-        // const res = await fetch("https://ai-project-api.mukund.page/", {
+      console.log(process.env.BACKEND_URL);
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL, {
         method: "POST",
         body: formDataToSubmit,
       });
