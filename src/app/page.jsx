@@ -21,6 +21,8 @@ export default function Home() {
   const [prediction, setPrediction] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [accuracy, setAccuracy] = useState(null);
+  const [model, setModel] = useState(null);
   async function processImage() {
     setPrediction(null);
     const data = canvasRef.current.toDataURL("image/png");
@@ -48,12 +50,34 @@ export default function Home() {
       }
     }
     setIsLoading(false);
+    async function getAccuracy() {
+      try {
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL);
+        if (!res.ok) {
+          throw new Error("Error");
+        }
+        const data = await res.json();
+        setAccuracy(data?.accuracy);
+        setModel(data?.model);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    getAccuracy();
   }, []);
   return (
     !isLoading && (
       <main className="flex flex-col items-center min-h-screen gap-5 p-12">
         <div className="flex flex-col items-center gap-2 px-2 py-5 text-center bg-white rounded-xl">
           <h1 className="text-3xl font-bold text-black">Number Predictor</h1>
+          {accuracy && (
+            <>
+              <h1 className="text-lg font-normal text-black">Model: {model}</h1>
+              <h1 className="text-lg font-normal text-black">
+                Accuracy: {accuracy}
+              </h1>
+            </>
+          )}
           <Canvas
             width={isMobile ? 300 : 500}
             height={isMobile ? 300 : 500}
