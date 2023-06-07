@@ -1,4 +1,4 @@
-import Canvas from "@/components/Canvas";
+import Canvas from "@/components/CanvasElement";
 import { motion } from "framer-motion";
 
 const numberNames = [
