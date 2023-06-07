@@ -1,19 +1,7 @@
 "use client";
-import Canvas from "@/components/canvas";
 import { useRef, useEffect, useState } from "react";
-
-const numberNames = [
-  "Zero",
-  "One",
-  "Two",
-  "Three",
-  "Four",
-  "Five",
-  "Six",
-  "Seven",
-  "Eight",
-  "Nine",
-];
+import { RingLoader } from "react-spinners";
+import PredictorElement from "@/components/PredictorElement";
 
 export default function Home() {
   const canvasRef = useRef(null);
@@ -23,38 +11,43 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [accuracy, setAccuracy] = useState(null);
   const [model, setModel] = useState(null);
-  async function processImage() {
+  const processImage = async () => {
     setPrediction(null);
+
+    // Setting Image Data to FormData
     const data = canvasRef.current.toDataURL("image/png");
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("data", data);
     try {
-      console.log(process.env.BACKEND_URL);
       const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL, {
         method: "POST",
         body: formDataToSubmit,
       });
       if (!res.ok) {
-        throw new Error("Error");
+        alert("API Not Working");
+        return;
       }
       const data = await res.json();
       setPrediction(data.prediction);
     } catch (err) {
       console.log(err);
     }
-  }
+  };
   useEffect(() => {
+    // Setting Up Canvas For Mobile and Desktop
     if (typeof window !== "undefined") {
       if (window.innerWidth < 768) {
         setIsMobile(true);
       }
     }
-    setIsLoading(false);
-    async function getAccuracy() {
+
+    // Getting Accuracy and Model Details
+    const getAccuracy = async () => {
       try {
         const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL);
         if (!res.ok) {
-          throw new Error("Error");
+          alert("API Not Working");
+          return;
         }
         const data = await res.json();
         setAccuracy(data?.accuracy);
@@ -62,66 +55,33 @@ export default function Home() {
       } catch (err) {
         console.log(err);
       }
-    }
+    };
     getAccuracy();
+    // Wait for 2 seconds to load the model
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2200);
   }, []);
   return (
-    !isLoading && (
-      <main className="flex flex-col items-center min-h-screen gap-5 p-12">
-        <div className="flex flex-col items-center gap-2 px-2 py-5 text-center bg-white rounded-xl">
-          <h1 className="text-3xl font-bold text-black">Number Predictor</h1>
-          {accuracy && (
-            <>
-              <h1 className="text-lg font-normal text-black">Model: {model}</h1>
-              <h1 className="text-lg font-normal text-black">
-                Accuracy: {accuracy}
-              </h1>
-            </>
-          )}
-          <Canvas
-            width={isMobile ? 300 : 500}
-            height={isMobile ? 300 : 500}
-            canvasRef={canvasRef}
-            ctxRef={ctxRef}
-            isMobile={isMobile}
-          />
-          <div className="flex gap-2">
-            {/* Reset Button */}
-            <button
-              className="px-4 py-2 mt-4 text-white bg-black rounded"
-              onClick={() => {
-                setPrediction(null);
-                ctxRef.current.clearRect(
-                  0,
-                  0,
-                  canvasRef.current.width,
-                  canvasRef.current.height
-                );
-              }}
-            >
-              Reset
-            </button>
-            <button
-              className="px-4 py-2 mt-4 text-white bg-black rounded"
-              onClick={processImage}
-            >
-              Predict
-            </button>
+    <main>
+      {isLoading ? (
+        <>
+          <div className="flex items-center justify-center w-full min-h-screen">
+            <RingLoader color="#ffffff" />
           </div>
-          <br className="p-2" />
-          {prediction && (
-            <div className="flex flex-col justify-center px-8 py-3 text-center bg-black rounded-xl">
-              <h1 className="text-3xl font-extrabold text-white">Prediction</h1>
-              <h1 className="text-[80px] font-medium text-white">
-                {prediction}
-              </h1>
-              <h1 className="text-[50px] font-medium text-white">
-                {numberNames[prediction]}
-              </h1>
-            </div>
-          )}
-        </div>
-      </main>
-    )
+        </>
+      ) : (
+        <PredictorElement
+          prediction={prediction}
+          accuracy={accuracy}
+          model={model}
+          isMobile={isMobile}
+          canvasRef={canvasRef}
+          ctxRef={ctxRef}
+          processImage={processImage}
+          setPrediction={setPrediction}
+        />
+      )}
+    </main>
   );
 }

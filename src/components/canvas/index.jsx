@@ -14,7 +14,7 @@ export default function Canvas({ width, height, canvasRef, ctxRef, isMobile }) {
     ctx.scale(2, 2);
     ctx.lineCap = "round";
     ctx.strokeStyle = "white";
-    ctx.lineWidth = isMobile ? 30 : 40;
+    ctx.lineWidth = isMobile ? 30 : 35;
     ctxRef.current = ctx;
   }, []);
 
@@ -52,7 +52,7 @@ export default function Canvas({ width, height, canvasRef, ctxRef, isMobile }) {
   return (
     <>
       <canvas
-        className="bg-black border-2 border-white touch-none"
+        className="bg-black rounded-xl touch-none"
         id="canvas"
         ref={canvasRef}
         onMouseDown={startDrawing}
